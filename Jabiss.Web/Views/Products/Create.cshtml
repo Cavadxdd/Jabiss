@@ -1,0 +1,103 @@
+﻿@model Jabiss.Web.Models.Products.CreateProductViewModel
+
+@{
+    ViewData["Title"] = "Create Product";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Create Product</h2>
+
+@if (ViewData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger" role="alert">
+        @ViewData["ErrorMessage"]
+    </div>
+}
+
+<form asp-controller="Products" asp-action="Create" method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Price" class="form-label"></label>
+        <input asp-for="Price" class="form-control" type="number" step="0.01" />
+        <span asp-validation-for="Price" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Stock" class="form-label"></label>
+        <input asp-for="Stock" class="form-control" type="number" />
+        <span asp-validation-for="Stock" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CategoryId" class="form-label"></label>
+        <select asp-for="CategoryId" class="form-control" asp-items="@(new SelectList(ViewBag.Categories, "Id", "Name"))"></select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Images</label>
+        <div id="imageContainer" class="image-container">
+            @if (Model?.Images != null && Model.Images.Any())
+            {
+                foreach (var image in Model.Images)
+                {
+                    <div class="image-wrapper" style="position: relative; display: inline-block; margin-right: 10px;">
+                        <img src="data:image/jpeg;base64,@Convert.ToBase64String(image.ImageData)" alt="Product Image" style="width: 100px; height: auto;" />
+                        <button type="button" class="btn btn-danger btn-sm delete-image" data-image-id="@image.Id" style="position: absolute; top: 5px; right: 5px;">X</button>
+                    </div>
+                }
+            }
+        </div>
+        <button type="button" id="addImage" class="btn btn-secondary mt-2">Add Photo</button>
+        <input type="file" id="imageInput" name="imageInput" style="display: none;" accept="image/*" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $('#addImage').on('click', function () {
+            $('#imageInput').click();
+        });
+
+        $('#imageInput').on('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    const base64Data = event.target.result.split(',')[1]; 
+                    const index = $('#imageContainer .image-wrapper').length;
+                    const imageHtml = `
+                                <div class="image-wrapper" style="position: relative; display: inline-block; margin-right: 10px;">
+                                    <img src="${event.target.result}" alt="Product Image" style="width: 100px; height: auto;" />
+                                    <button type="button" class="btn btn-danger btn-sm delete-image" style="position: absolute; top: 5px; right: 5px;">X</button>
+                                    <input type="hidden" name="Images[${index}].ImageData" value="${base64Data}" />
+                                </div>`;
+                    $('#imageContainer').append(imageHtml);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        $(document).on('click', '.delete-image', function () {
+            $(this).parent().remove();
+            $('#imageContainer .image-wrapper').each(function (index) {
+                $(this).find('input[type="hidden"]').attr('name', `Images[${index}].ImageData`);
+            });
+        });
+    </script>
+}

@@ -1,0 +1,236 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+@model HomeListViewModel
+
+@{
+    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+    var userName = User.Identity?.Name;
+    var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+    Layout = "~/Views/Shared/_HomeLayout.cshtml";
+}
+
+@if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+{
+    <a href="/Products" class="btn btn-danger mb-3">
+        🔐 Admin Panel
+    </a>
+}
+
+<div class="container-fluid mt-4 position-relative">
+    <div id="categoriesSidebar" class="categories-sidebar">
+        <h5 class="mb-3">Categories</h5>
+        <ul class="list-group mb-4">
+            @foreach (var category in Model.Categories)
+            {
+                var isActive = category.Id == Model.SelectedCategoryId;
+                var listItemClass = isActive ? "category-item active-category" : "category-item";
+
+                <li class="list-group-item @listItemClass">
+                    <a asp-controller="Home"
+                       asp-action="ByCategory"
+                       asp-route-categoryId="@category.Id"
+                       class="category-link">
+                        ◉ @category.Name
+                    </a>
+                </li>
+            }
+        </ul>
+    </div>
+
+    <button id="toggleCategories" class="sidebar-toggle">
+        <span class="sidebar-text">Categories</span>
+    </button>
+
+    <div class="row mb-3 align-items-baseline">
+        <div class="col-md-3">
+            <form asp-controller="Home"
+                  asp-action="@(Model.SelectedCategoryId != null ? "ByCategory" : "Index")"
+                  method="get"
+                  class="w-100">
+                @if (Model.SelectedCategoryId != null)
+                {
+                    <input type="hidden" name="categoryId" value="@Model.SelectedCategoryId" />
+                }
+                <div class="d-inline">
+                    <select name="sortOption"
+                            id="sortOption"
+                            class="form-select sort-select @(Model.SortOption != null && Model.SortOption != "" ? "has-filter" : "")"
+                            onchange="this.form.submit()">
+                        <option value="" selected="@(Model.SortOption == null || Model.SortOption == "" ? "selected" : null)">Default</option>
+                        <option value="low" selected="@(Model.SortOption == "low" ? "selected" : null)">Price: Low to High</option>
+                        <option value="high" selected="@(Model.SortOption == "high" ? "selected" : null)">Price: High to Low</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-9">
+            <div class="input-group search-bar">
+                <span class="input-group-text bg-white border-end-0">
+                    <i class="bi bi-search text-muted"></i>
+                </span>
+                <input id="globalSearchInput"
+                       type="search"
+                       class="form-control border-start-0"
+                       placeholder="Search..."
+                       data-category-id="@Model.SelectedCategoryId" />
+            </div>
+        </div>
+    </div>
+
+    <div class="products-container">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+            @foreach (var product in Model.Products)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm product-card">
+                        <div class="card-body d-flex flex-column">
+                            <img src="@product.ImageBase64"
+                                 class="card-img-top"
+                                 alt="@product.Name"
+                                 style="width: 100%; height: 200px; object-fit: contain; border-radius: 3px; background-color: #fff;" />
+
+                            <h6 class="card-title mt-2">@product.Name</h6>
+                            <p class="card-text text-muted">@product.Price ₼</p>
+                            <a asp-controller="Home"
+                               asp-action="Details"
+                               asp-route-id="@product.Id"
+                               class="btn details-btn mt-auto">Details</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .categories-sidebar {
+        position: fixed;
+        top: 0;
+        left: -250px;
+        width: 250px;
+        height: 100%;
+        background: #fff;
+        border-right: 1px solid #ddd;
+        padding: 15px;
+        overflow-y: auto;
+        transition: left 0.3s ease;
+        z-index: 1050;
+    }
+
+        .categories-sidebar.active {
+            left: 0;
+        }
+
+    .sidebar-toggle {
+        position: fixed;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        z-index: 1100;
+        padding: 8px 14px;
+        font-weight: 500;
+        color: #000;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 0 5px 5px 0;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+        .sidebar-toggle .sidebar-text {
+            font-size: 14px;
+            display: inline-block;
+        }
+
+    .categories-sidebar.active + .sidebar-toggle {
+        left: 250px;
+    }
+
+    .sidebar-toggle:hover {
+        background-color: #f5f5f5;
+    }
+
+    .search-bar {
+        border-radius: 50px;
+        overflow: hidden;
+        box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+
+        .search-bar .form-control {
+            border: none;
+            outline: none;
+            box-shadow: none;
+        }
+
+        .search-bar .input-group-text {
+            border: none;
+        }
+
+    .products-container {
+        width: 100%;
+    }
+
+    .sort-select {
+        display: inline-block;
+        width: 100%;
+    }
+
+    @@media (min-width: 992px) {
+        .row-cols-md-4 > * {
+            flex: 0 0 auto;
+            width: 25%;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggleBtn = document.getElementById("toggleCategories");
+        const sidebar = document.getElementById("categoriesSidebar");
+        const textSpan = toggleBtn.querySelector(".sidebar-text");
+
+        toggleBtn.addEventListener("click", function () {
+            sidebar.classList.toggle("active");
+            if (sidebar.classList.contains("active")) {
+                textSpan.textContent = "<";
+            } else {
+                textSpan.textContent = "Categories";
+            }
+        });
+    });
+
+    (function () {
+        const input = document.getElementById('globalSearchInput');
+        if (!input) return;
+        const categoryId = input.dataset.categoryId ?? "";
+        let t;
+        input.addEventListener('input', function (e) {
+            clearTimeout(t);
+            t = setTimeout(async () => {
+                const q = e.target.value.trim();
+                const url = new URL('/Home/Search', window.location.origin);
+                if (q.length > 0) url.searchParams.append('term', q);
+                if (categoryId !== "") url.searchParams.append('categoryId', categoryId);
+                const res = await fetch(url.toString());
+                const products = await res.json();
+                const grid = document.querySelector('.row.row-cols-1.row-cols-sm-2.row-cols-md-4.g-4');
+                if (!grid) return;
+                grid.innerHTML = products.map(p => `
+                        <div class="col">
+                            <div class="card h-100 shadow-sm product-card">
+                                <div class="card-body d-flex flex-column">
+                                    <img src="${p.imageBase64 ?? ''}" class="card-img-top" style="width:100%;height:200px;object-fit:contain;border-radius:3px;background:#fff;" alt="${p.name}" />
+                                    <h6 class="card-title mt-2">${p.name}</h6>
+                                    <p class="card-text text-muted">${p.price} ₼</p>
+                                    <a href="/Home/Details/${p.id}" class="btn details-btn mt-auto">Details</a>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+            }, 1000);
+        });
+    })();
+</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">

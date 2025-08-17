@@ -1,0 +1,248 @@
+﻿@model Jabiss.Web.Models.HomePages.HomeProductDetailModel
+@using System.Text.Json
+@{
+    Layout = "~/Views/Shared/_HomeLayout.cshtml";
+}
+
+@Html.AntiForgeryToken()
+
+@{
+    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-5 position-relative">
+            <div class="position-relative">
+                <img id="product-image" src="@Model.Images.FirstOrDefault()" class="img-fluid rounded" alt="@Model.Name" />
+                <div id="prev-column" style="position:absolute;top:0;left:0;width:20%;height:100%;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:flex-start;padding-left:5px;">
+                    <span style="font-size:2rem;color:white;text-shadow:0 0 5px black;">&#10094;</span>
+                </div>
+                <div id="next-column" style="position:absolute;top:0;right:0;width:20%;height:100%;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:flex-end;padding-right:5px;">
+                    <span style="font-size:2rem;color:white;text-shadow:0 0 5px black;">&#10095;</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-7">
+            <h2>@Model.Name</h2>
+            <h4 class="text-success">@Model.Price ₼</h4>
+            <p>@Model.Description</p>
+            <p><strong>Stock:</strong> @Model.Stock</p>
+            <div class="d-flex gap-2 mt-3">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">← Back to Home</a>
+
+                @if (isAuthenticated)
+                {
+                    <button id="addToCartButton" type="button" class="btn btn-warning"
+                            onclick="checkAndOpenModal(@Model.Id, '@Model.Name', '@Model.Price', '@Model.Images.FirstOrDefault()')">
+                        🛒 Add to cart
+                    </button>
+                }
+                else
+                {
+                    <button id="addToCartButton" type="button"
+                            class="btn btn-warning"
+                            onclick="window.location.href='@Url.Action("Login", "Account")'">
+                        🛒 Add to cart
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addToCartModal" tabindex="-1" aria-labelledby="addToCartLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addToCartLabel">Add to Cart</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="modalProductId" />
+                <div class="d-flex align-items-center">
+                    <img id="modalProductImage" class="img-thumbnail me-3" style="width: 100px; height: 100px;" />
+                    <div>
+                        <h6 id="modalProductName"></h6>
+                        <p id="modalProductPrice" class="fw-bold"></p>
+                        <p>Stock: <span id="availableStock"></span></p>
+                        <p>Already in cart: <span id="currentCartQuantity">0</span></p>
+                        <label for="quantitySelect">Quantity:</label>
+                        <select id="quantitySelect" class="form-select"></select>
+                        <p id="errorMessage" class="text-danger mt-2" style="display: none;"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="confirmAddToCart" class="btn btn-warning">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="successToast" class="toast bg-success text-white" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-body">
+            Product added to cart successfully!
+        </div>
+    </div>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="errorToast" class="toast bg-danger text-white" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-body">
+            <span id="errorToastMessage">You can add maximum 15 items to cart!</span>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const images = @Html.Raw(JsonSerializer.Serialize(Model.Images));
+        let currentIndex = 0;
+        const imageElement = document.getElementById('product-image');
+
+        document.getElementById('prev-column').addEventListener('click', function () {
+            if (currentIndex > 0) { currentIndex--; imageElement.src = images[currentIndex]; }
+        });
+        document.getElementById('next-column').addEventListener('click', function () {
+            if (currentIndex < images.length - 1) { currentIndex++; imageElement.src = images[currentIndex]; }
+        });
+
+        function checkAndOpenModal(productId, productName, productPrice, productImage) {
+            const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+            loadingModal.show();
+
+            fetch(`/Cart/GetAddToCartOptions?productId=${productId}`)
+                .then(response => response.json())
+                .then(data => {
+                    loadingModal.hide();
+
+                    if (data.success && data.canAddToCart) {
+                        openAddToCartModal(productId, productName, productPrice, productImage, data);
+                    } else {
+                        updateAddToCartButton(data);
+                        showError(data.reason || 'Cannot add to cart');
+                    }
+                })
+                .catch(error => {
+                    loadingModal.hide();
+                    console.error('Error:', error);
+                    showError('Error checking cart status');
+                });
+        }
+
+        function updateCartButtonStatus(productId) {
+            fetch(`/Cart/GetAddToCartOptions?productId=${productId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateAddToCartButton(data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating button status:', error);
+                });
+        }
+
+        function openAddToCartModal(productId, productName, productPrice, productImage, cartData) {
+            document.getElementById('modalProductId').value = productId;
+            document.getElementById('modalProductName').textContent = productName;
+            document.getElementById('modalProductPrice').textContent = productPrice + ' ₼';
+            document.getElementById('modalProductImage').src = productImage;
+            document.getElementById('availableStock').textContent = cartData.productStock;
+            document.getElementById('currentCartQuantity').textContent = cartData.currentInCart;
+
+            const quantitySelect = document.getElementById('quantitySelect');
+            const errorMessage = document.getElementById('errorMessage');
+            const confirmButton = document.getElementById('confirmAddToCart');
+
+            quantitySelect.innerHTML = '';
+            errorMessage.style.display = 'none';
+            confirmButton.disabled = false;
+
+            for (let i = 1; i <= cartData.maxQuantity; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                quantitySelect.appendChild(option);
+            }
+
+            new bootstrap.Modal(document.getElementById('addToCartModal')).show();
+        }
+
+        function updateAddToCartButton(cartData) {
+            const addButton = document.getElementById('addToCartButton');
+
+            if (!addButton) return;
+
+            if (!cartData.canAddToCart) {
+                addButton.disabled = true;
+                if (cartData.currentInCart >= cartData.productStock) {
+                    addButton.textContent = 'Stock Limit Reached';
+                } else {
+                    addButton.textContent = 'Limit Reached';
+                }
+                addButton.classList.remove('btn-warning');
+                addButton.classList.add('btn-secondary');
+            } else {
+                addButton.disabled = false;
+                addButton.textContent = '🛒 Add to cart';
+                addButton.classList.remove('btn-secondary');
+                addButton.classList.add('btn-warning');
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('errorToastMessage').textContent = message;
+            new bootstrap.Toast(document.getElementById('errorToast')).show();
+        }
+
+        document.getElementById('confirmAddToCart').addEventListener('click', function () {
+            const productId = parseInt(document.getElementById('modalProductId').value);
+            const quantity = parseInt(document.getElementById('quantitySelect').value);
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            const formData = new FormData();
+            formData.append('productId', productId);
+            formData.append('quantity', quantity);
+            if (token) formData.append('__RequestVerificationToken', token);
+
+            fetch('/Cart/AddToCart', { method: 'POST', body: formData })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        bootstrap.Modal.getInstance(document.getElementById('addToCartModal')).hide();
+                        new bootstrap.Toast(document.getElementById('successToast')).show();
+
+                        if (data.cartCount && document.querySelector('.badge.bg-danger')) {
+                            document.querySelector('.badge.bg-danger').textContent = data.cartCount;
+                            document.querySelector('.badge.bg-danger').style.display = 'inline-block';
+                        }
+
+                        updateCartButtonStatus(productId);
+                    } else {
+                        showError('Error adding product to cart: ' + (data.message || 'Unknown error'));
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    showError('Error adding product to cart');
+                });
+        });
+    </script>
+}

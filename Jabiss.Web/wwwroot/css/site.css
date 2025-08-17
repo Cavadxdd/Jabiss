@@ -1,0 +1,411 @@
+﻿html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+.btn-slide {
+    z-index: 1;
+    position: relative;
+    font-size: inherit;
+    font-family: inherit;
+    color: white;
+    padding: 0.5em 1em;
+    outline: none;
+    border: none;
+    background-color: hsl(236, 32%, 26%);
+    overflow: hidden;
+    transition: color 0.25s ease-in-out;
+    border-radius: 0.5rem; /* Dairəvi künc */
+}
+
+    .btn-slide::before {
+        content: '';
+        z-index: -1;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: #fc2f70;
+        transform-origin: center right;
+        transform: scaleX(0);
+        transition: transform 0.25s ease-in-out;
+        border-radius: inherit; /* Radius uyğunlaşdır */
+    }
+
+    .btn-slide:hover {
+        cursor: pointer;
+        color: white;
+    }
+
+        .btn-slide:hover::before {
+            transform-origin: center left;
+            transform: scaleX(1);
+        }
+
+
+
+.btn-slide-blue {
+    z-index: 1;
+    position: relative;
+    font-size: inherit;
+    font-family: inherit;
+    color: white;
+    padding: 0.5em 1em;
+    outline: none;
+    border: none;
+    background-color: hsl(236, 32%, 26%);
+    overflow: hidden;
+    transition: color 0.25s ease-in-out;
+    border-radius: 0.5rem; /* Dairəvi künc */
+}
+
+    .btn-slide-blue::before {
+        content: '';
+        z-index: -1;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: #3991e3;
+        transform-origin: center right;
+        transform: scaleX(0);
+        transition: transform 0.25s ease-in-out;
+        border-radius: inherit; /* Radius uyğunlaşdır */
+    }
+
+    .btn-slide-blue:hover {
+        cursor: pointer;
+        color: white;
+    }
+
+        .btn-slide-blue:hover::before {
+            transform-origin: center left;
+            transform: scaleX(1);
+        }
+
+
+.btn-bubble {
+    z-index: 1;
+    position: relative;
+    display: inline-block;
+    font-size: inherit;
+    font-family: inherit;
+    color: white;
+    text-decoration: none;
+    padding: 0.5em 1em;
+    outline: none;
+    border: none;
+    background-color: hsl(236, 32%, 26%);
+    overflow: hidden;
+    transition: color 0.4s ease-in-out;
+    border-radius: 0.5rem; /* Dairəvi künc */
+}
+
+    .btn-bubble::before {
+        content: '';
+        z-index: -1;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background-color: #3cefff;
+        transform: translate(-50%, -50%) scale(0);
+        transition: transform 0.45s ease-in-out;
+    }
+
+    .btn-bubble:hover {
+        cursor: pointer;
+        color: #161616;
+    }
+
+        .btn-bubble:hover::before {
+            transform: translate(-50%, -50%) scale(2.5); /* Bütün düyməni boya */
+        }
+
+
+
+.btn-slide-y {
+    z-index: 1;
+    position: relative;
+    font-size: inherit;
+    font-family: inherit;
+    color: white;
+    padding: 0.5em 1em;
+    outline: none;
+    border: none;
+    background-color: hsl(236, 32%, 26%);
+    overflow: hidden;
+    cursor: pointer;
+    border-radius: 0; /* Künclər iti qalsın */
+    transition: color 0.25s ease-in-out;
+}
+
+    .btn-slide-y::before {
+        content: '';
+        z-index: -1;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: #fc2f70;
+        transform-origin: center bottom;
+        transform: scaleY(0);
+        transition: transform 0.25s ease-in-out;
+        border-radius: inherit;
+    }
+
+    .btn-slide-y:hover {
+        color: white;
+    }
+
+        .btn-slide-y:hover::before {
+            transform-origin: center top;
+            transform: scaleY(1);
+        }
+
+
+
+/* Baza stil */
+.category-item {
+    transition: all 0.3s ease-in-out;
+    border: none;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    background-color: #f8f9fa;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+    .category-item:last-child {
+        margin-bottom: 0;
+    }
+
+/* Link normal halda */
+.category-link {
+    display: block;
+    width: 100%;
+    text-decoration: none;
+    color: #495057;
+    padding: 14px 18px;
+    font-size: 15px;
+    font-weight: 500;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    letter-spacing: 0.3px;
+    transition: all 0.3s ease-in-out;
+    border-radius: 8px;
+}
+
+/* Kateqoriya başlığı */
+.category-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 16px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* List group üçün əlavə stillər */
+.list-group {
+    border: none;
+    background: transparent;
+}
+
+.list-group-item {
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+}
+
+/* Baza stil */
+.category-item {
+    transition: all 0.3s ease-in-out;
+    border: none;
+    border-radius: 6px;
+    margin-bottom: 4px;
+    background-color: transparent;
+}
+
+    .category-item:last-child {
+        margin-bottom: 0;
+    }
+
+/* Link normal halda */
+.category-link {
+    display: block;
+    width: 100%;
+    text-decoration: none;
+    color: #495057;
+    padding: 12px 16px;
+    font-size: 15px;
+    font-weight: 500;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: all 0.3s ease-in-out;
+    border-radius: 6px;
+}
+
+/* Aktiv kateqoriya - ən yüksək prioritet */
+.active-category .category-link {
+    background-color: #fc954c !important;
+    color: white !important;
+    font-weight: 600 !important;
+}
+
+/* Hover efekti - yalnız aktiv olmayanlara */
+.category-item:not(.active-category):hover .category-link {
+    background-color: #fc954c;
+    color: white;
+    transform: translateX(2px);
+}
+
+
+/* Sort select box stilleri */
+.sort-select {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: white;
+    color: #495057;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    min-width: 180px;
+}
+
+    /* Hover efekti */
+    .sort-select:hover {
+        border-color: #007bff;
+        background-color: #f8f9ff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+    }
+
+    /* Focus efekti */
+    .sort-select:focus {
+        outline: none;
+        border-color: #007bff;
+        background-color: #f8f9ff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+
+    /* Filtr tətbiq olunduqda (seçili filtr varsa) */
+    .sort-select.has-filter {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border-color: #28a745;
+        color: white;
+        font-weight: 600;
+    }
+
+        .sort-select.has-filter:hover {
+            background: linear-gradient(135deg, #218838 0%, #1ea080 100%);
+            border-color: #1e7e34;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(40, 167, 69, 0.3);
+        }
+
+    /* Option stilleri (mümkün olduqda) */
+    .sort-select option {
+        padding: 8px 12px;
+        font-size: 14px;
+        font-weight: 500;
+        background-color: white;
+        color: #495057;
+    }
+
+/* Form container */
+.sort-form-container {
+    margin-bottom: 20px;
+}
+
+    .sort-form-container label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #495057;
+        margin-right: 12px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+
+
+   
+
+ /* Details button stilleri */
+.details-btn {
+    position: relative;
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: white;
+    text-decoration: none;
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+    display: inline-block;
+}
+
+    /* Parlama efekti üçün pseudo element */
+    .details-btn::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient( 45deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0.6) 52%, rgba(255, 255, 255, 0.3) 54%, transparent 70% );
+        transform: translateX(-100%) translateY(-100%) rotate(45deg);
+        transition: transform 0.6s ease-in-out;
+    }
+
+    /* Hover efekti */
+    .details-btn:hover {
+        background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+        color: white;
+    }
+
+        /* Hover zamanı parlama efektinin hərəkəti */
+        .details-btn:hover::before {
+            transform: translateX(50%) translateY(50%) rotate(45deg);
+        }
+
+    /* Active/click efekti */
+    .details-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+    }
+
+    /* Focus efekti */
+    .details-btn:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    }
+

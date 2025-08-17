@@ -1,0 +1,125 @@
+﻿@model List<JabissCommon.CartItemViewModel>
+
+@{
+    Layout = "~/Views/Shared/_CartLayout.cshtml";
+    ViewData["Title"] = "Cart";
+    var total = Model.Sum(x => x.Price * x.Quantity);
+}
+
+<nav style="font-size:14px; margin-bottom:20px; display:flex; align-items:center; gap:6px;">
+    <a href="/Home/Index" style="color:#007bff; text-decoration:none;">🏠 Home</a>
+    <span style="color:#999;">›</span>
+    <span style="color:#555; font-weight:bold;">🛒 Cart</span>
+</nav>
+
+<hr />
+
+<div class="cart-container" style="display:flex; gap:40px;">
+    <div style="flex:2;">
+        @foreach (var item in Model)
+        {
+            <div style="position:relative; display:flex; align-items:center; padding:15px; border:1px solid #ddd; border-radius:8px; margin-bottom:15px; background:#fff;">
+
+                <form asp-action="RemoveFromCart" asp-controller="Cart" method="post" style="position:absolute; top:8px; right:8px;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="cartItemId" value="@item.Id" />
+                    <button type="submit" style="background:none; border:none; cursor:pointer; font-size:18px; color:#888;">
+                        🗑
+                    </button>
+                </form>
+
+                <div style="flex:0 0 100px;">
+                    <a href="@Url.Action("Details", "Home", new { id = item.ProductId })">
+                        <img src="@(item.ImageBase64 != null
+                                       ? $"data:image/jpeg;base64,{item.ImageBase64}"
+                                       : "/images/no-image.png")"
+                             style="width:100px; height:100px; object-fit:contain; background-color:#f8f8f8; border-radius:4px;" />
+                    </a>
+                </div>
+
+                <div style="flex:1; padding-left:15px;">
+                    <a href="@Url.Action("Details", "Home", new { id = item.ProductId })" style="text-decoration:none; color:#333;">
+                        <div style="font-weight:bold; font-size:14px; margin-bottom:5px;">@item.Name</div>
+                    </a>
+                    <div style="color:black; font-size:16px;">
+                        @item.Price.ToString("0.00") ₼
+                    </div>
+                </div>
+
+                <div style="flex:0 0 80px; text-align:right;">
+                    <select class="quantity-select" data-cart-item-id="@item.Id" style="padding:5px; border-radius:4px;">
+                        @for (int i = 1; i <= Math.Min(15, item.Stock); i++)
+                        {
+                            <option value="@i" selected="@(item.Quantity == i)">
+                                @i
+                            </option>
+                        }
+                    </select>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div style="flex:1; border-left:1px solid #ddd; padding-left:20px;">
+        <div style="font-weight:bold; font-size:16px; margin-bottom:10px;">Total</div>
+        <div style="font-size:18px; font-weight:bold; margin-bottom:10px;">
+            @total.ToString("0.00") ₼
+        </div>
+        <div style="color:#888; font-size:12px; margin-bottom:20px;">
+            Please refer to your final actual payment amount.
+        </div>
+        <form action="/checkout" method="get">
+            <button type="submit" style="
+                width:100%;
+                background-color:orange;
+                border:none;
+                padding:12px;
+                border-radius:25px;
+                color:white;
+                font-weight:bold;
+                font-size:16px;
+                cursor:pointer;">
+                Checkout (@Model.Count)
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.quantity-select').forEach(function (select) {
+        select.addEventListener('change', function () {
+            var cartItemId = this.getAttribute('data-cart-item-id');
+            var quantity = this.value;
+
+            fetch('/Cart/UpdateQuantity', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: `cartItemId=${cartItemId}&quantity=${quantity}`
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    }
+                });
+        });
+    });
+
+    var formData = new FormData();
+    formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]').value);
+    formData.append('cartItemId', cartItemId);
+    formData.append('quantity', quantity);
+
+    fetch('/Cart/UpdateQuantity', {
+        method: 'POST',
+        body: formData
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) location.reload();
+        });
+
+</script>

@@ -1,0 +1,45 @@
+﻿<style>
+    .nav-link {
+        transition: all 0.2s ease-in-out;
+    }
+
+        .nav-link:hover {
+            color: #0d6efd; 
+            background-color: rgba(13, 110, 253, 0.1);
+            border-radius: 6px;
+        }
+</style>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm py-3 mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-bold text-primary" href="/Products" style="font-size: 1.5rem;">
+            🛍️ Jabiss Admin
+        </a>
+        <a href="Home/Index" class="btn btn-danger">
+             Customer page ->
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNavbar">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link text-dark fw-semibold px-3" href="/Products">
+                        📦 Products
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark fw-semibold px-3" href="/Categories">
+                        🗂️ Categories
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark fw-semibold px-3" href="/Orders">
+                        🧾 Orders
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

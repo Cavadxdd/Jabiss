@@ -1,0 +1,93 @@
+﻿@using Jabiss.Web.Models.Categories
+@model CategoryViewModel
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h4 class="mb-3">Categories</h4>
+
+@if (ViewData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success" role="alert">
+        @ViewData["SuccessMessage"]
+    </div>
+}
+
+<p>
+    <a class="btn btn-primary" asp-controller="Categories" asp-action="Create">Create New</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>No</th>
+            <th>Name</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @for (int i = 0; i < Model.Categories.Count; i++)
+        {
+            var category = Model.Categories[i];
+
+            <tr>
+                <td>@(i + 1)</td>
+                <td>@category.Name</td>
+                <td>
+                    <a asp-controller="Categories" asp-action="Edit" asp-route-id="@category.Id" class="btn btn-sm btn-warning">Edit</a>
+
+                    <button class="btn btn-danger btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteCategoryModal"
+                            data-category-id="@category.Id"
+                            data-category-name="@category.Name"
+                            >
+                        Delete
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="modal fade" id="deleteCategoryModal" tabindex="-1" aria-labelledby="deleteCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-action="Delete">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteCategoryModalLabel">Delete Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the following Category?</p>
+                    <ul>
+                        <li><strong>Name:</strong> <span id="modalCategoryName"></span></li>
+                    </ul>
+                    <input type="hidden" name="Id" id="modalCategoryId" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const deleteModal = document.getElementById('deleteCategoryModal');
+
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+
+            const button = event.relatedTarget;
+            const id = button.getAttribute('data-category-id');
+            const name = button.getAttribute('data-category-name');
+
+
+            document.getElementById('modalCategoryId').value = id;
+            document.getElementById('modalCategoryName').textContent = name;
+        });
+    </script>
+}

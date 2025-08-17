@@ -1,0 +1,120 @@
+﻿@using Microsoft.AspNetCore.Http
+@using System.Security.Claims
+@{
+    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+    var userName = User.Identity?.Name;
+    var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+
+    string userInitials = "";
+    if (isAuthenticated && !string.IsNullOrEmpty(userName))
+    {
+        var nameParts = userName.Split(' ');
+        if (nameParts.Length >= 2)
+        {
+            userInitials = $"{nameParts[0].Substring(0, 1)}{nameParts[1].Substring(0, 1)}".ToUpper();
+        }
+        else if (nameParts.Length == 1)
+        {
+            userInitials = nameParts[0].Substring(0, Math.Min(2, nameParts[0].Length)).ToUpper();
+        }
+    }
+}
+<style>
+    h2 {
+        letter-spacing: 1px;
+    }
+
+    .btn:hover {
+        transform: scale(1.03);
+        transition: all 0.2s ease-in-out;
+    }
+
+    .user-avatar {
+        width: 45px;
+        height: 45px;
+        background-color: #ff8c00;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 16px;
+        text-decoration: none;
+        transition: all 0.2s ease-in-out;
+    }
+
+        .user-avatar:hover {
+            background-color: #ff7700;
+            transform: scale(1.05);
+            color: white;
+            text-decoration: none;
+        }
+</style>
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title - Jabiss</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css?v=1.1" />
+</head>
+<body>
+    <header class="bg-white shadow-sm py-3 mb-4">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center position-relative">
+                @if (isAuthenticated && userRole != "Admin")
+                {
+                    <a asp-controller="Account" asp-action="Index" class="user-avatar position-absolute"
+                       style="left: -60px;" title="@userName">
+                        @userInitials
+                    </a>
+                }
+
+                <a asp-controller="Home" asp-action="Index" class="text-decoration-none">
+                    <h2 class="m-0 fw-bold text-primary">Jabiss</h2>
+                </a>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+                <div>
+                    <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-primary position-relative">
+                        🛒 Cart
+                        @if (ViewBag.CartCount != null && ViewBag.CartCount > 0)
+                        {
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                @ViewBag.CartCount
+                            </span>
+                        }
+                    </a>
+                </div>
+                @if (!isAuthenticated)
+                {
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-secondary">
+                        🔐 Login
+                    </a>
+                }
+                else
+                {
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline m-0">
+                        <button type="submit" class="btn btn-outline-danger">
+                            🚪 Logout
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    </header>
+    <main class="container">
+        @RenderBody()
+    </main>
+
+    <footer class="bg-light text-center p-3 mt-5">
+        <small>&copy; @DateTime.Now.Year - Jabiss</small>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    @RenderSection(@"scripts", false)
+</body>
+</html>

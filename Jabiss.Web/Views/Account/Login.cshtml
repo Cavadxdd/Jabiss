@@ -1,0 +1,48 @@
+﻿@model Jabiss.Web.Models.Account.LoginViewModel
+
+@{
+    Layout = "~/Views/Shared/_HomeLayout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+
+            <h2 class="mb-4 text-center">🔐 Login</h2>
+
+            <form asp-controller="Account" asp-action="Login" method="post">
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label">Username</label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label">Password</label>
+                    <input asp-for="Password" class="form-control" type="password" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input asp-for="LoginAsAdmin" class="form-check-input" />
+                    <label asp-for="LoginAsAdmin" class="form-check-label">
+                        Login as Admin
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Log in</button>
+            </form>
+
+            <div class="text-center mt-3">
+                <a asp-controller="Account" asp-action="SignUp" class="text-decoration-none">
+                    Don’t have any account? Create one
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
