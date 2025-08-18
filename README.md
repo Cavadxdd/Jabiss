@@ -4,7 +4,7 @@ Jabiss, C# və .NET texnologiyaları ilə hazırlanmış bir **e-ticarət platfo
 
 ## Texnologiyalar
 
-- **Backend:** C#, .NET 6/7, ASP.NET Core, Web API  
+- **Backend:** C#, .NET 8, ASP.NET Core, Web API  
 - **Frontend:** Razor Pages, HTML, CSS  
 - **Verilənlər Bazası:** MSSQL  
 - **Dizayn Prinsipləri:** Clean Architecture, SOLID prinsipləri  
@@ -13,9 +13,7 @@ Jabiss, C# və .NET texnologiyaları ilə hazırlanmış bir **e-ticarət platfo
 
 - İstifadəçi qeydiyyatı və login  
 - Admin paneli  
-- Məhsul kateqoriyaları və idarəsi  
 - Səbət (Cart) sistemi  
-- Çoxlu məhsul şəkil dəstəyi  
 - Cookie authentication və rol əsaslı yönləndirmə  
 
 ## Quraşdırma
