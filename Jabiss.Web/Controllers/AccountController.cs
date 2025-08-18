@@ -20,14 +20,16 @@ namespace Jabiss.Web.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
         private readonly IUserService _userService;
+        private readonly IUserVerificationService _verificationService;
         private readonly ISecurityService _securityService;
 
-        public AccountController(SignInManager<User> signInManager, UserManager<User> userManager, IUserService userService, ISecurityService securityService)
+        public AccountController(SignInManager<User> signInManager, UserManager<User> userManager, IUserService userService, ISecurityService securityService, IUserVerificationService verificationService)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _userService = userService;
             _securityService = securityService;
+            _verificationService = verificationService;
         }
 
         [HttpGet]
@@ -58,7 +60,7 @@ namespace Jabiss.Web.Controllers
                 return View(model);
             }
 
-                var claims = new List<Claim>
+            var claims = new List<Claim>
                   {
                           new Claim("Id", user.Id.ToString()),  // Burada Id claim'i ekleniyor
                           new Claim(ClaimTypes.Name, user.Name),
@@ -66,7 +68,7 @@ namespace Jabiss.Web.Controllers
                           new Claim(ClaimTypes.Email, user.Email),
                           new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
                   };
-                 
+
             var identity = new ClaimsIdentity(claims, IdentityConstants.ApplicationScheme);
             var principal = new ClaimsPrincipal(identity);
 
@@ -106,35 +108,53 @@ namespace Jabiss.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SignUp(SignUpViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
+            if (!ModelState.IsValid) return View(model);
 
-            // Eyni email varsa qəbul etmə
-            var existingUser = await _userService.GetByUsernameAsync(model.Name);
-            if (existingUser != null)
+            // username və ya email unikal yoxlamaları (məsləhət: həm ad, həm email yoxla)
+            var existingByName = await _userService.GetByUsernameAsync(model.Name);
+            if (existingByName != null)
             {
                 ModelState.AddModelError("Name", "This username is already taken.");
                 return View(model);
             }
+            // TODO: əgər varsa GetByEmailAsync → email üçün də yoxla
 
-            // Şifrəni hash-lə
-            string passwordHash = _securityService.Hash(model.Password);
+            var passwordHash = _securityService.Hash(model.Password);
 
-            var newUser = new UserServiceModel
+            // 5 dəqiqəlik kod
+            await _verificationService.StartAsync(model.Name, model.Email, passwordHash, TimeSpan.FromMinutes(5));
+
+            // Kod səhifəsinə yönləndir
+            return RedirectToAction(nameof(VerifyCode), new { email = model.Email });
+        }
+
+        [HttpGet]
+        public IActionResult VerifyCode(string email)
+        {
+            var vm = new VerifyCodeViewModel { Email = email };
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifyCode(VerifyCodeViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            var ok = await _verificationService.CompleteAsync(
+                model.Email,
+                model.Code,
+                onVerified: async (userModel) => { await _userService.SaveAsync(userModel); });
+
+            if (!ok)
             {
-                Name = model.Name,
-                Email = model.Email,
-                PasswordHash = passwordHash,
-                Role = "Customer",  // həmişə Customer olacaq
-                CreatedAt = DateTime.UtcNow
-            };
+                ModelState.AddModelError(string.Empty, "Invalid or expired code.");
+                return View(model);
+            }
 
-            await _userService.SaveAsync(newUser);
-
-            // Qeydiyyatdan sonra Login səhifəsinə yönləndir
+            TempData["Message"] = "Your account has been created. Please log in.";
             return RedirectToAction("Login", "Account");
         }
+
     }
 }

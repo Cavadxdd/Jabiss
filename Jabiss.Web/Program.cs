@@ -9,6 +9,7 @@ using JabissStorage.Domain.Interfaces;
 using Jabiss.Web.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
+using Jabiss.Business.Services.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,14 @@ var configuration = builder.Configuration;
 
 builder.Services.AddSession();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("SmtpSettings"));
+builder.Services.AddTransient<IEmailService, SmtpEmailService>();
+
+builder.Services.AddTransient<IUserVerificationRepository>(sp =>
+    new MsSqlUserVerificationRepository(builder.Configuration.GetConnectionString("Default")));
+builder.Services.AddTransient<IUserVerificationService, UserVerificationService>();
+
 
 builder.Services.AddControllersWithViews();
 
