@@ -5,6 +5,9 @@
     var userName = User.Identity?.Name;
     var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
 
+    string currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    string currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+
     string userInitials = "";
     if (isAuthenticated && !string.IsNullOrEmpty(userName))
     {
@@ -64,7 +67,9 @@
     <header class="bg-white shadow-sm py-3 mb-4">
         <div class="container d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center position-relative">
-                @if (isAuthenticated && userRole != "Admin")
+                @* Avatar yalnız Account/Index-də gizlənəcək *@
+                @if (isAuthenticated && userRole != "Admin" &&
+                !(currentController == "Account" && currentAction == "Index"))
                 {
                     <a asp-controller="Account" asp-action="Index" class="user-avatar position-absolute"
                        style="left: -60px;" title="@userName">
@@ -78,22 +83,44 @@
             </div>
 
             <div class="d-flex align-items-center gap-3">
-                <div>
-                    <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-primary position-relative">
-                        🛒 Cart
-                        @if (ViewBag.CartCount != null && ViewBag.CartCount > 0)
-                        {
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                @ViewBag.CartCount
-                            </span>
-                        }
-                    </a>
-                </div>
+                @* Cart icon yalnız Cart/Index, Account/Login və Account/SignUp-da gizlənəcək *@
+                @if (!(currentController == "Cart" && currentAction == "Index") &&
+                !(currentController == "Account" && currentAction == "Login") &&
+                !(currentController == "Account" && currentAction == "SignUp"))
+                {
+                    <div>
+                        <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-primary position-relative">
+                            🛒 Cart
+                            @if (ViewBag.CartCount != null && ViewBag.CartCount > 0)
+                            {
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    @ViewBag.CartCount
+                                </span>
+                            }
+                        </a>
+                    </div>
+                }
+
                 @if (!isAuthenticated)
                 {
-                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-secondary">
-                        🔐 Login
-                    </a>
+                    if (currentController == "Account" && currentAction == "Login")
+                    {
+                        <a asp-controller="Account" asp-action="SignUp" class="btn btn-outline-success">
+                            📝 Sign Up
+                        </a>
+                    }
+                    else if (currentController == "Account" && currentAction == "SignUp")
+                    {
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-secondary">
+                            🔐 Login
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-secondary">
+                            🔐 Login
+                        </a>
+                    }
                 }
                 else
                 {
@@ -115,6 +142,6 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    @RenderSection(@"scripts", false)
+    @RenderSection("scripts", false)
 </body>
 </html>
