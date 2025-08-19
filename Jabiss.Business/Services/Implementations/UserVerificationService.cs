@@ -34,7 +34,7 @@ namespace Jabiss.Business.Services.Implementations
                 Email = email,
                 PasswordHash = passwordHash,
                 Code = code,
-                ExpiresAt = DateTime.UtcNow.Add(ttl)
+                ExpiresAt = DateTime.Now.Add(ttl)
             };
 
             var id = await _repo.CreateOrReplaceAsync(model);
@@ -48,7 +48,7 @@ namespace Jabiss.Business.Services.Implementations
             if (rec == null) return false;
 
             // vaxt keçibsə
-            if (rec.ExpiresAt <= DateTime.UtcNow) return false;
+            if (rec.ExpiresAt <= DateTime.Now) return false;
 
             // çox cəhd (məs: 5 limit)
             if (rec.AttemptCount >= 5) return false;
@@ -66,7 +66,7 @@ namespace Jabiss.Business.Services.Implementations
                 Email = rec.Email,
                 PasswordHash = rec.PasswordHash,
                 Role = "Customer",
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.Now
             };
 
             await onVerified(userModel);
