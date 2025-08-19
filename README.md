@@ -15,7 +15,8 @@ Jabiss, C# və .NET texnologiyaları ilə hazırlanmış bir **e-ticarət platfo
 - Admin paneli  
 - Səbət (Cart) sistemi  
 - Cookie authentication və rol əsaslı yönləndirmə  
-
+- 2 Step verification on Sign Up (emailə OTP göndərməklə)
+  
 ## Quraşdırma
 
 1. Repository-i klonlayın:
